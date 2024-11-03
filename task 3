@@ -1,0 +1,38 @@
+IRIS FLOWER CLASSIFICATION
+import pandas as pd
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+file_path = r'/kaggle/input/iris-flower-dataset/IRIS.csv'
+data = pd.read_csv(file_path)
+data.head()
+data.isnull().sum()
+x = data.drop('species', axis=1)
+y = data['species']
+X_train,X_test,Y_train,Y_test= train_test_split(x,y,test_size=0.2,random_state=42)
+pipeline_rf = Pipeline([
+    ('scaler', StandardScaler()),
+    ('clf', RandomForestClassifier(random_state=42))
+])
+param_grid_rf = {
+    'clf__n_estimators': [100, 200, 300],  # Number of trees in the forest
+    'clf__max_depth': [None, 10, 20, 30],   # Maximum depth of the tree
+    'clf__min_samples_split': [2, 5, 10],   # Minimum number of samples required to split a node
+    'clf__min_samples_leaf': [1, 2, 4]      # Minimum number of samples required at each leaf node
+}
+grid_search = GridSearchCV(pipeline_rf , param_grid_rf, cv=5, scoring='accuracy')
+grid_search.fit(X_train,Y_train)
+best_model = grid_search.best_estimator_
+y_pred = best_model.predict(X_test)
+accuracy = accuracy_score(Y_test, y_pred)
+report = classification_report(Y_test, y_pred)
+print(f'Best Parameters: {grid_search.best_params_}')
+print(f'Accuracy: {accuracy}')
+print('Classification Report:')
+print(report)
+print(f'Best Parameters: {grid_search.best_params_}')
+print(f'Accuracy: {accuracy}')
+print('Classification Report:')
+print(report)
